@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.TextView;
-import java.text.NumberFormat;
 
+import java.text.NumberFormat;
 
 
 /**
@@ -13,7 +13,7 @@ import java.text.NumberFormat;
  */
 public class MainActivity extends ActionBarActivity {
 
-    int quantity = 0;
+    int quantity = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +24,11 @@ public class MainActivity extends ActionBarActivity {
     /**
      * This method is called when the order button is clicked.
      */
-    public void quantity(View view) {
-        coffeePrice(888888888);
+    public void submitOrder(View view) {
+        int price = (quantity * 5);
+        String priceMessage = "Total: $" +  price;
+        priceMessage = priceMessage + "\nThank You!";
+        displayMessage(priceMessage);
     }
 
     /**
@@ -45,6 +48,14 @@ public class MainActivity extends ActionBarActivity {
         numberOfCoffees(quantity);
         coffeePrice(quantity * 5);
 
+    }
+
+    /**
+     * This method displays the given text on the screen.
+     */
+    private void displayMessage(String message) {
+        TextView priceTextView = (TextView) findViewById(R.id.price_text_view);
+        priceTextView.setText(message);
     }
 
     /**
