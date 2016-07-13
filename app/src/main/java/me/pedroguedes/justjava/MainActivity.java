@@ -1,11 +1,14 @@
 package me.pedroguedes.justjava;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.NumberFormat;
 
@@ -15,7 +18,7 @@ import java.text.NumberFormat;
  */
 public class MainActivity extends ActionBarActivity {
 
-    int cupsQuantity = 0;
+    int cupsQuantity = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +39,10 @@ public class MainActivity extends ActionBarActivity {
      * This method is called when the plus button is clicked.
      */
     public void increment(View view) {
+        if (cupsQuantity == 100) {
+            Toast.makeText(MainActivity.this, "You cannot have more than 100 coffees", Toast.LENGTH_SHORT).show();
+            return;
+        }
         cupsQuantity = cupsQuantity + 1;
         displayQuantities(cupsQuantity);
     }
@@ -44,16 +51,31 @@ public class MainActivity extends ActionBarActivity {
      * This method is called when the minus button is clicked.
      */
     public void decrement(View view) {
+        if (cupsQuantity == 1) {
+            Toast.makeText(MainActivity.this, "You cannot have less than 1 coffee", Toast.LENGTH_SHORT).show();
+            return;
+        }
         cupsQuantity = cupsQuantity - 1;
         displayQuantities(cupsQuantity);
     }
 
     /**
      * Calculates the price of the order.
+     *
      * @return total price
      */
-    private int calculatePrice() {
-        int price = cupsQuantity * 4;
+    private int calculatePrice(boolean hasWippedCream, boolean hasChocolate) {
+        int basePrice = 5;
+
+        if (hasWippedCream) {
+            basePrice = basePrice + 1;
+        }
+
+        if (hasChocolate) {
+            basePrice = basePrice + 2;
+        }
+
+        int price = cupsQuantity * basePrice;
         return price;
     }
 
@@ -71,9 +93,22 @@ public class MainActivity extends ActionBarActivity {
         CheckBox chocolateCheckBox = (CheckBox) findViewById(R.id.chocolate_cream_checkbox);
         boolean hasChocolate = chocolateCheckBox.isChecked();
 
-        int price = calculatePrice();
+        int price = calculatePrice(hasWippedCream,hasChocolate);
         String priceMessage = createOrderSummary(price, hasWippedCream, hasChocolate, name);
+
+
+
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:mobile.gds@gmail.com")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_TEXT, priceMessage);
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Order Summary for " + name);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+
         displayMessage(priceMessage);
+
+
     }
 
     /**
@@ -87,10 +122,10 @@ public class MainActivity extends ActionBarActivity {
     /**
      * This method create the order summary
      *
-     * @param price of the order
+     * @param price          of the order
      * @param addWippedCream if the wipped cream is checked
-     * @param addChocolate if the chocolate is checked
-     * @param name name of the client
+     * @param addChocolate   if the chocolate is checked
+     * @param name           name of the client
      * @return order summary
      */
     private String createOrderSummary(int price, boolean addWippedCream, boolean addChocolate, String name) {
@@ -98,15 +133,15 @@ public class MainActivity extends ActionBarActivity {
         priceMessage += "\nAdd Wipped Cream: " + convetBooleanToYesOrNo(addWippedCream);
         priceMessage += "\nAdd Chocolate: " + convetBooleanToYesOrNo(addChocolate);
         priceMessage += "\nCup Quantity: " + cupsQuantity;
-        priceMessage += "\nTotal: $" +  price;
-        priceMessage +="\nThank You!";
+        priceMessage += "\nTotal: $" + price;
+        priceMessage += "\nThank You!";
         return priceMessage;
 
     }
 
 
     private String convetBooleanToYesOrNo(boolean yesOrNo) {
-        if (yesOrNo){
+        if (yesOrNo) {
             return "YES";
         } else {
             return "NO";
